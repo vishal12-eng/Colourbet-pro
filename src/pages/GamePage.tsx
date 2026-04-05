@@ -2,7 +2,6 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
-import { motion } from 'framer-motion';
 import WalletCard from '@/components/game/WalletCard';
 import GameTimer from '@/components/game/GameTimer';
 import ColorButtons from '@/components/game/ColorButtons';
@@ -10,7 +9,6 @@ import NumberGrid from '@/components/game/NumberGrid';
 import SizeBet from '@/components/game/SizeBet';
 import BetAmountSelector from '@/components/game/BetAmountSelector';
 import BetHistory from '@/components/game/BetHistory';
-import RoundHistory from '@/components/game/RoundHistory';
 import AppHeader from '@/components/layout/AppHeader';
 
 interface Round {
@@ -122,82 +120,62 @@ const GamePage = () => {
     }
   };
 
-  const getResultColor = (num: number) => {
-    if (num === 0 || num === 5) return 'violet';
-    if ([1, 3, 7, 9].includes(num)) return 'green';
-    return 'red';
-  };
-
   const bettingDisabled = !currentRound || currentRound.status !== 'open' || timeLeft <= 5;
 
   return (
     <div className="min-h-[100dvh] flex flex-col">
       <AppHeader />
       <div className="flex-1 w-full max-w-lg mx-auto px-4 pb-8 pt-4 space-y-4 safe-bottom">
+        {/* Wallet Card */}
         <WalletCard balance={profile?.wallet_balance ?? 0} />
 
-        {/* Round & Timer */}
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.05, duration: 0.35 }}
-          className="glass rounded-2xl p-5 shadow-card"
-        >
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-body text-muted-foreground">
-              Round #{currentRound?.round_number ?? '—'}
-            </span>
-            {currentRound?.status === 'completed' && currentRound.result !== null && (
-              <span className={`text-xs font-heading font-bold px-3 py-1 rounded-full ${
-                getResultColor(currentRound.result) === 'green' ? 'bg-game-green/15 text-game-green' :
-                getResultColor(currentRound.result) === 'red' ? 'bg-game-red/15 text-game-red' :
-                'bg-game-violet/15 text-game-violet'
-              }`}>
-                Result: {currentRound.result}
-              </span>
-            )}
+        {/* Main Game Card - single connected card */}
+        <div className="glass rounded-2xl p-4 shadow-card space-y-4">
+          {/* WinGo Pro title + Timer */}
+          <div className="flex items-center justify-between">
+            <span className="font-heading font-bold text-foreground text-base">WinGo Pro</span>
+            <GameTimer
+              timeLeft={timeLeft}
+              total={currentRound?.duration ?? 30}
+              status={currentRound?.status ?? 'waiting'}
+            />
           </div>
-          <GameTimer
-            timeLeft={timeLeft}
-            total={currentRound?.duration ?? 30}
-            status={currentRound?.status ?? 'waiting'}
+
+          {/* Color Buttons */}
+          <ColorButtons
+            selected={selectedBet?.type === 'color' ? selectedBet.value : null}
+            onSelect={(color) => setSelectedBet({ type: 'color', value: color })}
+            disabled={bettingDisabled}
           />
-        </motion.div>
 
-        <ColorButtons
-          selected={selectedBet?.type === 'color' ? selectedBet.value : null}
-          onSelect={(color) => setSelectedBet({ type: 'color', value: color })}
-          disabled={bettingDisabled}
-        />
+          {/* Number Grid */}
+          <NumberGrid
+            selected={selectedBet?.type === 'number' ? selectedBet.value : null}
+            onSelect={(num) => setSelectedBet({ type: 'number', value: num })}
+            disabled={bettingDisabled}
+          />
 
-        <NumberGrid
-          selected={selectedBet?.type === 'number' ? selectedBet.value : null}
-          onSelect={(num) => setSelectedBet({ type: 'number', value: num })}
-          disabled={bettingDisabled}
-        />
+          {/* Multiplier Chips */}
+          <BetAmountSelector amount={betAmount} onChange={setBetAmount} />
 
-        <SizeBet
-          selected={selectedBet?.type === 'size' ? selectedBet.value : null}
-          onSelect={(size) => setSelectedBet({ type: 'size', value: size })}
-          disabled={bettingDisabled}
-        />
+          {/* Big / Small */}
+          <SizeBet
+            selected={selectedBet?.type === 'size' ? selectedBet.value : null}
+            onSelect={(size) => setSelectedBet({ type: 'size', value: size })}
+            disabled={bettingDisabled}
+          />
 
-        <BetAmountSelector amount={betAmount} onChange={setBetAmount} />
-
-        {selectedBet && (
-          <motion.button
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            whileTap={{ scale: 0.96 }}
+          {/* Play Bet Button */}
+          <button
             onClick={placeBet}
-            disabled={placing || bettingDisabled}
-            className="w-full h-14 gradient-play text-white font-heading font-bold text-lg rounded-2xl shadow-[0_0_24px_hsla(38,92%,50%,0.3)] transition-all disabled:opacity-40 disabled:scale-100"
+            disabled={placing || bettingDisabled || !selectedBet}
+            className="w-full h-14 bg-yellow-400 hover:bg-yellow-300 text-gray-900 font-heading font-bold text-lg rounded-2xl shadow-[0_4px_20px_hsla(48,96%,53%,0.4)] transition-all active:scale-[0.97] disabled:opacity-40"
           >
-            {placing ? 'Placing...' : `Place Bet — ₹${betAmount}`}
-          </motion.button>
-        )}
+            {placing ? 'Placing...' : 'Play Bet'}
+          </button>
+        </div>
 
-        <RoundHistory />
+        {/* My History */}
         <BetHistory />
       </div>
     </div>

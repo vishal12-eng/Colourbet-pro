@@ -1,58 +1,64 @@
-import { motion } from 'framer-motion';
-import { Minus, Plus } from 'lucide-react';
+import { Dice5 } from 'lucide-react';
 
 interface BetAmountSelectorProps {
   amount: number;
   onChange: (amount: number) => void;
 }
 
-const presets = [10, 50, 100, 500];
+const multipliers = [
+  { label: 'X1', value: 1 },
+  { label: 'X5', value: 5 },
+  { label: 'X10', value: 10 },
+  { label: 'X50', value: 50 },
+  { label: 'X500', value: 500 },
+  { label: 'X1K', value: 1000 },
+];
 
 const BetAmountSelector = ({ amount, onChange }: BetAmountSelectorProps) => {
+  const handleRandom = () => {
+    const values = [1, 5, 10, 50, 100, 500, 1000, 2000];
+    onChange(values[Math.floor(Math.random() * values.length)]);
+  };
+
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.25, duration: 0.35 }}
-      className="glass rounded-2xl p-4 shadow-card"
-    >
-      <p className="text-[10px] font-body text-muted-foreground mb-3 uppercase tracking-widest">Bet Amount</p>
-      <div className="flex items-center gap-3 mb-3">
-        <motion.button
-          whileTap={{ scale: 0.9 }}
-          onClick={() => onChange(Math.max(10, amount - 10))}
-          className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-foreground hover:bg-white/10 transition-all"
-        >
-          <Minus className="w-4 h-4" />
-        </motion.button>
-        <div className="flex-1 text-center">
-          <span className="text-2xl font-heading font-bold text-foreground">₹{amount}</span>
-        </div>
-        <motion.button
-          whileTap={{ scale: 0.9 }}
-          onClick={() => onChange(amount + 10)}
-          className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-foreground hover:bg-white/10 transition-all"
-        >
-          <Plus className="w-4 h-4" />
-        </motion.button>
-      </div>
-      <div className="grid grid-cols-4 gap-2">
-        {presets.map((p) => (
-          <motion.button
-            key={p}
-            whileTap={{ scale: 0.92 }}
-            onClick={() => onChange(p)}
-            className={`h-9 rounded-xl font-heading font-semibold text-xs transition-all ${
-              amount === p
-                ? 'gradient-primary text-white shadow-glow'
-                : 'bg-white/5 border border-white/10 text-muted-foreground hover:bg-white/10 hover:text-foreground'
+    <div className="space-y-3">
+      <div className="grid grid-cols-6 gap-2">
+        {multipliers.map((m) => (
+          <button
+            key={m.label}
+            onClick={() => onChange(m.value)}
+            className={`h-10 rounded-xl font-heading font-semibold text-xs transition-all active:scale-95 ${
+              amount === m.value
+                ? 'bg-white text-primary shadow-lg'
+                : 'bg-white/10 border border-white/15 text-foreground hover:bg-white/20'
             }`}
           >
-            ₹{p}
-          </motion.button>
+            {m.label}
+          </button>
         ))}
       </div>
-    </motion.div>
+      <div className="grid grid-cols-2 gap-3">
+        <button
+          onClick={() => onChange(2000)}
+          className={`h-11 rounded-xl font-heading font-semibold text-sm transition-all active:scale-95 ${
+            amount === 2000
+              ? 'bg-white text-primary shadow-lg'
+              : 'bg-white/10 border border-white/15 text-foreground hover:bg-white/20'
+          }`}
+        >
+          X2K
+        </button>
+        <button
+          onClick={handleRandom}
+          className="h-11 rounded-xl font-heading font-semibold text-sm transition-all active:scale-95 gradient-play text-white shadow-[0_0_16px_hsla(38,92%,50%,0.25)]"
+        >
+          <span className="flex items-center justify-center gap-2">
+            <Dice5 className="w-4 h-4" />
+            Random
+          </span>
+        </button>
+      </div>
+    </div>
   );
 };
 

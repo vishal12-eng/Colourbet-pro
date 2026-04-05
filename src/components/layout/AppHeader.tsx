@@ -1,11 +1,12 @@
 import { useAuth } from '@/contexts/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
-import { LogOut, Shield, Wallet, ArrowDownCircle, ArrowUpCircle } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { LogOut, Shield, Wallet, ArrowDownCircle, ArrowUpCircle, Download } from 'lucide-react';
+import { usePwaInstall } from '@/hooks/usePwaInstall';
 
 const AppHeader = () => {
   const { user, isAdmin, signOut } = useAuth();
   const navigate = useNavigate();
+  const { isInstallable, promptInstall } = usePwaInstall();
 
   const iconBtn = "p-2 rounded-xl text-foreground/60 hover:text-foreground hover:bg-white/5 transition-all duration-200 active:scale-90";
 
@@ -16,6 +17,11 @@ const AppHeader = () => {
           Color<span className="text-warning">Bet</span> <span className="text-muted-foreground text-sm font-medium">Pro</span>
         </Link>
         <div className="flex items-center gap-0.5">
+          {isInstallable && (
+            <button onClick={promptInstall} className={iconBtn} title="Install App">
+              <Download className="w-5 h-5" />
+            </button>
+          )}
           <button onClick={() => navigate('/recharge')} className={iconBtn}><ArrowDownCircle className="w-5 h-5" /></button>
           <button onClick={() => navigate('/withdraw')} className={iconBtn}><ArrowUpCircle className="w-5 h-5" /></button>
           <button onClick={() => navigate('/wallet')} className={iconBtn}><Wallet className="w-5 h-5" /></button>

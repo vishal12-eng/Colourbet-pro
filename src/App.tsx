@@ -4,6 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
+import OfflineBanner from "@/components/OfflineBanner";
 import AuthPage from "./pages/AuthPage";
 import GamePage from "./pages/GamePage";
 import RechargePage from "./pages/RechargePage";
@@ -11,7 +12,6 @@ import WithdrawPage from "./pages/WithdrawPage";
 import WalletPage from "./pages/WalletPage";
 import AdminPage from "./pages/AdminPage";
 import NotFound from "./pages/NotFound";
-
 const queryClient = new QueryClient();
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -35,6 +35,7 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
+      <OfflineBanner />
       <Toaster />
       <Sonner />
       <BrowserRouter>
